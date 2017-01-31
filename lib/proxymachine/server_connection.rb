@@ -1,7 +1,8 @@
 class ProxyMachine
   class ServerConnection < EventMachine::Connection
     def self.request(host, port, client_side)
-      EventMachine.connect(host, port, self, client_side)
+      local_ip, local_port = client_side.socket_info.split(':')
+      EventMachine.bind_connect(local_ip, nil, host, port, self, client_side)
     end
 
     def initialize(conn)

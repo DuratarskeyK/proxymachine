@@ -26,6 +26,14 @@ class ProxyMachine
       end
     end
 
+    def socket_info
+      @socket_info ||=
+      begin
+        port, ip = Socket.unpack_sockaddr_in(get_sockname)
+        "#{ip}:#{port}"
+      end
+    end
+
     def receive_data(data)
       if !@connected
         @buffer << data
@@ -41,7 +49,7 @@ class ProxyMachine
     # attempt is made to connect and proxy to the remote server.
     def establish_remote_server
       fail "establish_remote_server called with remote established" if @remote
-      commands = ProxyMachine.router.call(@buffer.join)
+      commands = ProxyMachine.router.call(@buffer.join, socket_info)
       LOGGER.info "#{peer} #{commands.inspect}"
       close_connection unless commands.instance_of?(Hash)
       if remote = commands[:remote]
